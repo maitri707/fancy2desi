@@ -5,22 +5,22 @@
   --font-mono: var(--font-geist-mono);
   
   /* Brand Color Overrides */
-  --color-brand-green: #6f913d;
-  --color-brand-dark: #34482a;
-  --color-brand-offwhite: #fcfdfa;
-  --color-brand-light-gray: #f0f4e8;
+  --color-brand-curry: #e67e22;
+  --color-brand-dark: #8B4513;
+  --color-brand-offwhite: #fff8f0;
+  --color-brand-light-peach: #ffe8d6;
   
   /* Custom Colors */
-  --color-background: #fcfdfa;
-  --color-foreground: #34482a;
+  --color-background: #fff8f0;
+  --color-foreground: #8B4513;
   
   /* Border Radius */
   --radius: 0.75rem;
 }
 
 :root {
-  --background: #fcfdfa;
-  --foreground: #34482a;
+  --background: #fff8f0;
+  --foreground: #8B4513;
   --radius: 0.75rem;
 }
 
@@ -29,7 +29,7 @@
     @apply border-gray-200;
   }
   body {
-    @apply bg-background text-foreground selection:bg-brand-green/20;
+    @apply bg-background text-foreground selection:bg-brand-curry/20;
   }
 
   /* Custom "Desi Green" Scrollbar */
@@ -38,16 +38,16 @@
   }
 
   ::-webkit-scrollbar-track {
-    background: #fcfdfa;
+    background: #fff8f0;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: #6f913d;
+    background: #e67e22;
     border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: #34482a;
+    background: #8B4513;
   }
 }
 
@@ -59,3 +59,4 @@
     animation-fill-mode: forwards;
   }
 }
+

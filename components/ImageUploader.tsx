@@ -1,111 +1,145 @@
 "use client";
 import { useState, useRef } from "react";
-import { Camera, Type, Loader2, Sparkles, UploadCloud, ChefHat } from "lucide-react";
+import { Camera, Type, Loader2, Sparkles, UploadCloud, ChefHat, X, Image as ImageIcon } from "lucide-react";
 
 export default function ImageUploader({ onResult }: any) {
   const [loading, setLoading] = useState(false);
   const [inputMode, setInputMode] = useState<"image" | "text">("image");
   const [textInput, setTextInput] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    setLoading(true);
-    try {
-      const base64 = await toBase64(file);
-      const res = await fetch("/api/desify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64, text: null }),
-      });
-      const data = await res.json();
-      if (data.success) onResult(data.data);
-    } catch (error) {
-      alert("Failed to process image.");
-    } finally {
-      setLoading(false);
-    }
+    if (file) setSelectedFile(file);
   };
 
-  const handleTextSubmit = async () => {
-    if (!textInput.trim()) return;
+  const handleDesify = async () => {
     setLoading(true);
     try {
+      let payload = { image: null as string | null, text: null as string | null };
+
+      if (inputMode === "image" && selectedFile) {
+        payload.image = await toBase64(selectedFile);
+      } else if (inputMode === "text" && textInput.trim()) {
+        payload.text = textInput;
+      } else {
+        alert("Please provide a menu photo or text first!");
+        setLoading(false);
+        return;
+      }
+
       const res = await fetch("/api/desify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: null, text: textInput }),
+        body: JSON.stringify(payload),
       });
+
       const data = await res.json();
+      console.log("API Response:", data);
+      
       if (data.success) {
         onResult(data.data);
-        setTextInput("");
+        if (inputMode === "text") setTextInput("");
+        else setSelectedFile(null);
+      } else {
+        alert(`Error: ${data.error}`);
       }
     } catch (error) {
-      alert("Failed to process text.");
+      console.error("Fetch Error:", error);
+      alert("Failed to process request.");
     } finally {
       setLoading(false);
     }
   };
 
+  const isButtonDisabled = loading || (inputMode === "image" ? !selectedFile : !textInput.trim());
+
   return (
-    <div className="bg-white border border-gray-100 rounded-3xl p-8 shadow-xl shadow-[#6f913d]/5">
-      <div className="flex p-1 bg-gray-100 rounded-2xl mb-8 w-fit mx-auto">
+    // Reduced padding from p-8 to p-5 for a tighter fit
+    <div className="bg-white border border-gray-100 rounded-3xl p-5 sm:p-8 shadow-xl shadow-[#e67e22]/5">
+      
+      {/* Tab Switcher - Reduced margin-bottom and padding */}
+      <div className="flex p-1 bg-gray-100 rounded-2xl mb-5 w-fit mx-auto">
         {[
-          { id: "image", label: "Scan Menu", icon: Camera },
-          { id: "text", label: "Paste Text", icon: Type },
+          { id: "image", label: "Scan", icon: Camera },
+          { id: "text", label: "Text", icon: Type },
         ].map((mode) => (
           <button
             key={mode.id}
             onClick={() => setInputMode(mode.id as any)}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              inputMode === mode.id 
-                ? "bg-white text-[#34482a] shadow-sm" 
-                : "text-gray-500 hover:text-[#6f913d]"
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              inputMode === mode.id
+                ? "bg-white text-[#8B4513] shadow-sm"
+                : "text-gray-500 hover:text-[#e67e22]"
             }`}
           >
-            <mode.icon size={18} />
+            <mode.icon size={16} />
             {mode.label}
           </button>
         ))}
       </div>
 
-      {inputMode === "image" ? (
-        <div 
-          onClick={() => fileInputRef.current?.click()}
-          className="group border-2 border-dashed border-gray-200 rounded-2xl p-12 text-center hover:border-[#6f913d] hover:bg-[#f0f4e8]/30 transition-all cursor-pointer"
-        >
-          <input ref={fileInputRef} type="file" onChange={handleUpload} accept="image/*" className="hidden" />
-          <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-            <UploadCloud className="text-gray-400 group-hover:text-[#6f913d]" size={32} />
+      {/* Input Section - Reduced height from h-64 to h-48 for mobile */}
+      <div className="h-48 mb-5">
+        {inputMode === "image" ? (
+          <div
+            onClick={() => !selectedFile && fileInputRef.current?.click()}
+            className={`h-full border-2 border-dashed rounded-2xl flex flex-col items-center justify-center transition-all ${
+              selectedFile 
+                ? "border-[#e67e22] bg-[#ffe8d6]/10 cursor-default" 
+                : "border-gray-200 hover:border-[#e67e22] hover:bg-[#ffe8d6]/30 cursor-pointer"
+            }`}
+          >
+            <input ref={fileInputRef} type="file" onChange={handleFileChange} accept="image/*" className="hidden" />
+            
+            {selectedFile ? (
+              <div className="relative group w-full h-full p-4 flex flex-col items-center justify-center">
+                <div className="w-12 h-12 bg-[#ffe8d6] rounded-xl flex items-center justify-center text-[#e67e22] mb-2">
+                  <ImageIcon size={24} />
+                </div>
+                <p className="text-[#8B4513] font-bold text-xs truncate max-w-[150px]">{selectedFile.name}</p>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                  className="mt-1 text-[10px] font-bold text-red-500 hover:underline flex items-center gap-1"
+                >
+                  <X size={12} /> Remove
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                  <UploadCloud className="text-gray-400" size={24} />
+                </div>
+                <p className="text-[#8B4513] font-bold text-sm">Upload menu photo</p>
+                <p className="text-gray-400 text-[10px] mt-0.5">PNG, JPG or JPEG up to 10MB</p>
+              </>
+            )}
           </div>
-          <p className="text-[#34482a] font-bold">Click to upload menu photo</p>
-          <p className="text-gray-400 text-xs mt-1">PNG, JPG up to 10MB</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
+        ) : (
           <textarea
             value={textInput}
             onChange={(e) => setTextInput(e.target.value)}
-            placeholder="e.g. Deconstructed Berry Parfait..."
-            className="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-[#6f913d] focus:ring-4 focus:ring-[#6f913d]/5 outline-none transition-all font-medium min-h-32 text-sm"
+            placeholder="Type menu here..."
+            className="w-full h-full p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:border-[#e67e22] focus:ring-4 focus:ring-[#e67e22]/5 outline-none transition-all font-medium text-sm resize-none"
           />
-          <button
-            onClick={handleTextSubmit}
-            disabled={!textInput.trim() || loading}
-            className="w-full bg-[#6f913d] hover:bg-[#5a7632] text-white py-4 rounded-2xl font-bold shadow-lg shadow-[#6f913d]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-          >
-            {loading ? <Loader2 className="animate-spin" /> : <Sparkles size={18} />}
-            Desify This Menu
-          </button>
-        </div>
-      )}
+        )}
+      </div>
+
+      {/* Common Action Button - Slightly reduced padding */}
+      <button
+        onClick={handleDesify}
+        disabled={isButtonDisabled}
+        className="w-full bg-[#e67e22] hover:bg-[#8B4513] text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-[#e67e22]/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed text-sm"
+      >
+        {loading ? <Loader2 className="animate-spin size-4" /> : <Sparkles size={16} />}
+        Desify This Menu
+      </button>
 
       {loading && (
-        <div className="mt-6 flex items-center justify-center gap-3 text-[#6f913d] font-bold animate-pulse">
-          <ChefHat size={20} />
-          <span>Cooking desi magic...</span>
+        <div className="mt-4 flex items-center justify-center gap-2 text-[#e67e22] font-bold animate-pulse text-xs">
+          <ChefHat size={16} />
+          <span>Translating</span>
         </div>
       )}
     </div>
