@@ -2,9 +2,9 @@ import { desifyMenu } from "@/lib/helper"
 
 export async function POST(req: Request) {
   try {
-    const { image } = await req.json()
+    const { image, text } = await req.json()
 
-    const result = await desifyMenu(image)
+    const result = await desifyMenu(image || null, text || null)
 
     return Response.json({ success: true, data: result })
   } catch (err) {

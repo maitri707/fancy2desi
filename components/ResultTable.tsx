@@ -9,7 +9,19 @@ export default function ResultTable({ data }: any) {
     cleanData = cleanData.replace(/^```\s*/, '').replace(/\s*```$/, '')
   }
 
-  const items = JSON.parse(cleanData)
+  let items: any[] = []
+  try {
+    items = JSON.parse(cleanData)
+  } catch (error) {
+    console.error("Failed to parse JSON:", error)
+    console.error("Raw data:", data)
+    return (
+      <div className="mt-10 p-4 bg-red-50 border border-red-200 rounded">
+        <p className="text-red-700 font-semibold">Error parsing response</p>
+        <p className="text-red-600 text-sm mt-2">The API response was not in valid JSON format. Please try again.</p>
+      </div>
+    )
+  }
 
   return (
     <table className="mt-10 w-full">
