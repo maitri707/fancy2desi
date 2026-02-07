@@ -1,26 +1,61 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  /* Brand Color Overrides */
+  --color-brand-green: #6f913d;
+  --color-brand-dark: #34482a;
+  --color-brand-offwhite: #fcfdfa;
+  --color-brand-light-gray: #f0f4e8;
+  
+  /* Custom Colors */
+  --color-background: #fcfdfa;
+  --color-foreground: #34482a;
+  
+  /* Border Radius */
+  --radius: 0.75rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root {
+  --background: #fcfdfa;
+  --foreground: #34482a;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  body {
+    @apply bg-background text-foreground selection:bg-brand-green/20;
+  }
+
+  /* Custom "Desi Green" Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #fcfdfa;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #6f913d;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #34482a;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Smooth Fade-in Animations */
+  .animate-in {
+    animation-duration: 0.3s;
+    animation-timing-function: ease-out;
+    animation-fill-mode: forwards;
+  }
 }
